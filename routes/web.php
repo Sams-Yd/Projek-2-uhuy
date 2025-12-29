@@ -11,7 +11,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [ProductController::class, 'index'])->name('home');
+Route::view('/', 'welcome')->name('home');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('products.show');
 
@@ -36,6 +36,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/products/{id}/edit', [AdminController::class, 'editProduct'])->name('admin.products.edit');
     Route::patch('/products/{id}', [AdminController::class, 'updateProduct'])->name('admin.products.update');
     Route::delete('/products/{id}', [AdminController::class, 'destroyProduct'])->name('admin.products.destroy');
+    Route::post('/products/{id}/restore', [AdminController::class, 'restoreProduct'])->name('admin.products.restore');
 
     // Promos
     Route::get('/promos', [AdminController::class, 'promos'])->name('admin.promos');

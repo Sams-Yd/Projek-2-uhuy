@@ -69,7 +69,12 @@ class AdminController extends Controller
     {
         $categories = Category::all();
 
-        $query = Product::query();
+        // Allow viewing trashed products when ?trashed=1 is present
+        if ($request->filled('trashed')) {
+            $query = Product::onlyTrashed();
+        } else {
+            $query = Product::query();
+        }
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
@@ -78,6 +83,16 @@ class AdminController extends Controller
         $products = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.products.index', compact('products','categories'));
+    }
+
+    public function restoreProduct($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        if ($product->trashed()) {
+            $product->restore();
+            return redirect()->route('admin.products')->with('success', 'Produk berhasil dikembalikan');
+        }
+        return redirect()->route('admin.products')->with('info', 'Produk tidak dalam keadaan terhapus');
     }
 
     public function createProduct()

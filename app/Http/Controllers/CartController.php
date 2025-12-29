@@ -33,6 +33,7 @@ class CartController extends Controller
             $item = CartItem::firstOrNew(['cart_id' => $cart->id, 'product_id' => $product->id]);
             $item->qty = ($item->exists ? $item->qty + $qty : $qty);
             $item->save();
+            $cartCount = $cart->items()->sum('qty');
         } else {
             $session = session('cart_items', []);
             $found = false;
@@ -43,10 +44,11 @@ class CartController extends Controller
                 $session[] = ['product_id' => $product->id, 'qty' => $qty, 'product' => $product];
             }
             session(['cart_items' => $session]);
+            $cartCount = collect(session('cart_items', []))->sum('qty');
         }
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'count' => count(session('cart_items', []))]);     
+            return response()->json(['success' => true, 'count' => $cartCount]);
         }
         return redirect()->back()->with('success', 'Produk ditambahkan ke keranjang');
     }
@@ -66,6 +68,41 @@ class CartController extends Controller
             }
             session(['cart_items' => $session]);
         }
+        // prepare response data
+        $itemSubtotal = 0;
+        $cartTotal = 0;
+        $cartCount = 0;
+
+        if (Auth::check()) {
+            $cart = Cart::firstOrCreate(['user_id' => auth()->id()]);
+            $items = $cart->items()->with('product')->get();
+            foreach ($items as $it) {
+                $line = ($it->product->price ?? 0) * $it->qty;
+                if ($it->product_id == $id) $itemSubtotal = $line;
+                $cartTotal += $line;
+                $cartCount += $it->qty;
+            }
+        } else {
+            $session = session('cart_items', []);
+            foreach ($session as $s) {
+                $price = isset($s['product']['price']) ? $s['product']['price'] : 0;
+                $line = $price * $s['qty'];
+                if ($s['product_id'] == $id) $itemSubtotal = $line;
+                $cartTotal += $line;
+                $cartCount += $s['qty'];
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'count' => $cartCount,
+                'itemSubtotal' => $itemSubtotal,
+                'total' => $cartTotal,
+                'qty' => $qty,
+            ]);
+        }
+
         return redirect()->route('cart.index');
     }
 

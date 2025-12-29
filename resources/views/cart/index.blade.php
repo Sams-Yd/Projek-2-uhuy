@@ -58,10 +58,15 @@
                         Rp{{ number_format($p->price ?? 0, 0, ',', '.') }}
                       </p>
                       <div class="flex items-center gap-3">
-                        <span class="text-slate-600 font-medium">Qty:</span>
-                        <span class="bg-slate-100 px-3 py-1 rounded font-semibold">{{ $qty }}</span>
+                        <form action="{{ route('cart.update', $p->id ?? $it['product_id']) }}" method="POST" class="cart-update-form flex items-center gap-3" data-price="{{ $p->price ?? 0 }}" data-product-id="{{ $p->id ?? $it['product_id'] }}">
+                          @csrf
+                          <input type="hidden" name="qty" value="{{ $qty }}" class="qty-input">
+                          <button type="button" class="qty-decrease px-3 py-1 bg-slate-100 rounded">−</button>
+                          <span class="bg-slate-100 px-3 py-1 rounded font-semibold qty-display">{{ $qty }}</span>
+                          <button type="button" class="qty-increase px-3 py-1 bg-slate-100 rounded">+</button>
+                        </form>
                         <span class="text-slate-600">Subtotal:</span>
-                        <span class="font-bold text-slate-900">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
+                        <span class="font-bold text-slate-900 item-subtotal" data-product-id="{{ $p->id ?? $it['product_id'] }}">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                       </div>
                     </div>
 
@@ -95,13 +100,13 @@
               <!-- Items Count -->
               <div class="flex justify-between mb-4 pb-4 border-b border-slate-200">
                 <span class="text-slate-600">Jumlah Item</span>
-                <span class="font-semibold text-slate-900">{{ count($items) }} produk</span>
+                <span class="font-semibold text-slate-900" id="cart-items-count">{{ collect($items)->sum(fn($it)=> $it->qty ?? $it['qty']) }} produk</span>
               </div>
 
               <!-- Subtotal -->
               <div class="flex justify-between mb-4 pb-4 border-b border-slate-200">
                 <span class="text-slate-600">Subtotal</span>
-                <span class="font-semibold text-slate-900">Rp{{ number_format($total, 0, ',', '.') }}</span>
+                <span class="font-semibold text-slate-900" id="cart-total">Rp{{ number_format($total, 0, ',', '.') }}</span>
               </div>
 
               <!-- Shipping (Dummy) -->
@@ -136,4 +141,55 @@
       @endif
     </div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+      function updateBadge(count){
+        const b = document.querySelector('.cart-badge'); if(b) b.textContent = count;
+      }
+
+      document.querySelectorAll('.qty-decrease').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const form = btn.closest('.cart-update-form');
+          const input = form.querySelector('.qty-input');
+          let v = Math.max(1, parseInt(input.value || '1') - 1);
+          input.value = v; form.dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
+        });
+      });
+      document.querySelectorAll('.qty-increase').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const form = btn.closest('.cart-update-form');
+          const input = form.querySelector('.qty-input');
+          let v = Math.max(1, parseInt(input.value || '1') + 1);
+          input.value = v; form.dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
+        });
+      });
+
+      // Intercept form submit for cart-update
+      document.querySelectorAll('.cart-update-form').forEach(form=>{
+        form.addEventListener('submit', async function(e){
+          e.preventDefault();
+          try{
+            const fd = new FormData(form);
+            const res = await fetch(form.action, { method: 'POST', body: fd, headers: { 'X-Requested-With':'XMLHttpRequest' } });
+            const json = await res.json();
+            if(json && json.success){
+              // update qty display
+              form.querySelector('.qty-display').textContent = json.qty;
+              // update item subtotal
+              const pid = form.dataset.productId;
+              const el = document.querySelector('.item-subtotal[data-product-id="'+pid+'"]');
+              if(el) el.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(json.itemSubtotal);
+              // update total
+              const totalEl = document.getElementById('cart-total');
+              if(totalEl) totalEl.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(json.total);
+              // update items count text
+              const countEl = document.getElementById('cart-items-count');
+              if(countEl) countEl.textContent = (json.count) + ' produk';
+              updateBadge(json.count);
+            }
+          }catch(err){ console.error(err); }
+        });
+      });
+    });
+  </script>
 </x-app-layout>

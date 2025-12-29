@@ -59,8 +59,9 @@
         }
     </style>
 
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
+    <div class="min-h-screen relative bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_rgba(99,102,241,0.06),_rgba(14,165,233,0.03))]"></div>
+        <div class="max-w-7xl mx-auto relative z-10">
             <!-- Header Section -->
             <div class="mb-8">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

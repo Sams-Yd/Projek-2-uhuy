@@ -14,16 +14,29 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+</body>
+    <body class="font-sans antialiased bg-gradient-to-br from-slate-900 via-purple-800 to-blue-700 text-white min-h-screen">
+        <div class="relative min-h-screen flex items-center justify-center px-4 py-12">
+            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.06),_transparent)]"></div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            <div class="max-w-md w-full space-y-6 relative z-10">
+                <div class="text-center">
+                    <a href="/" class="inline-flex items-center gap-3">
+                        <div class="bg-white/10 p-3 rounded-md">
+                            <span class="text-2xl">📚</span>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-xl">Mitus Stationery</div>
+                            <div class="text-sm text-white/70">Alat tulis modern</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg p-6">
+                    {{ $slot }}
+                </div>
+
+                <p class="text-center text-sm text-white/60">© {{ date('Y') }} Mitus Stationery — Semua hak dilindungi.</p>
             </div>
         </div>
     </body>

@@ -1,4 +1,9 @@
 <x-guest-layout>
+    <div class="mb-4 text-center">
+        <h2 class="text-2xl font-semibold">Buat Akun Mitus</h2>
+        <p class="text-sm text-white/70">Daftar untuk mulai belanja dan menyimpan wishlist</p>
+    </div>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -39,8 +44,8 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+        <div class="flex items-center justify-between mt-4">
+            <a class="text-sm text-white/70 hover:underline" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
 
