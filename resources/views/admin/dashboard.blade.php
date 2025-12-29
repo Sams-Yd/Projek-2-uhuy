@@ -1,4 +1,67 @@
 <x-app-layout>
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="p-4 bg-white shadow rounded">
+                <div class="text-sm text-slate-500">Total Orders</div>
+                <div class="text-2xl font-bold">{{ number_format($totalOrders) }}</div>
+            </div>
+            <div class="p-4 bg-white shadow rounded">
+                <div class="text-sm text-slate-500">Pending Orders</div>
+                <div class="text-2xl font-bold">{{ number_format($pendingOrders) }}</div>
+            </div>
+            <div class="p-4 bg-white shadow rounded">
+                <div class="text-sm text-slate-500">Total Revenue</div>
+                <div class="text-2xl font-bold">Rp{{ number_format($totalRevenue,0,',','.') }}</div>
+            </div>
+            <div class="p-4 bg-white shadow rounded">
+                <div class="text-sm text-slate-500">Total Products</div>
+                <div class="text-2xl font-bold">{{ number_format($totalProducts) }}</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white shadow rounded p-4">
+                <h2 class="font-bold mb-2">Recent Orders</h2>
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50"><tr><th class="p-2">#</th><th class="p-2">User</th><th class="p-2">Total</th><th class="p-2">Status</th></tr></thead>
+                    <tbody>
+                        @foreach($recentOrders as $o)
+                            <tr class="border-b"><td class="p-2">#{{ $o->id }}</td><td class="p-2">{{ $o->user?->name ?? 'Guest' }}</td><td class="p-2">Rp{{ number_format($o->total,0,',','.') }}</td><td class="p-2">{{ $o->status }}</td></tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bg-white shadow rounded p-4">
+                <h2 class="font-bold mb-2">Top Products</h2>
+                <ul>
+                    @foreach($topProducts as $p)
+                        <li class="py-2 border-b">{{ $p->name }} — Terjual: {{ $p->total_sold ?? 0 }}</li>
+                    @endforeach
+                </ul>
+
+                <h2 class="font-bold mt-4 mb-2">Recent Promos</h2>
+                <ul>
+                    @foreach($promos as $promo)
+                        <li class="py-2 border-b">{{ $promo->code }} — {{ $promo->type }} {{ $promo->value }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a href="{{ route('admin.orders') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Kelola Pesanan</a>
+            <a href="{{ route('admin.products') }}" class="px-4 py-2 bg-green-600 text-white rounded ml-2">Kelola Produk</a>
+            <a href="{{ route('admin.promos') }}" class="px-4 py-2 bg-purple-600 text-white rounded ml-2">Manajemen Promo</a>
+            <a href="{{ route('admin.analytics') }}" class="px-4 py-2 bg-indigo-600 text-white rounded ml-2">Analitik</a>
+        </div>
+    </div>
+</x-app-layout>
+<x-app-layout>
   <style>
     .glass-effect {
       background: rgba(255, 255, 255, 0.95);
@@ -149,7 +212,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @forelse($recent as $order)
+                    @forelse($recentOrders as $order)
                       <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
                         <td class="py-3 px-3 text-slate-900 font-medium">#{{ $order->id }}</td>
                         <td class="py-3 px-3 text-slate-600">{{ $order->customer_name }}</td>

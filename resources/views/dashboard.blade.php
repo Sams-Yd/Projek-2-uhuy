@@ -69,7 +69,7 @@
                             <h1 class="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                                 Selamat Datang, {{ Auth::user()->name }}! 👋
                             </h1>
-                            <p class="text-slate-600 mt-2">Dashboard pelanggan - Lihat produk dan kelola pesanan Anda</p>
+                            <p class="text-slate-600 mt-2">Dashboard pelanggan</p>
                         @else
                             <h1 class="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                                 Katalog Produk 🛍️

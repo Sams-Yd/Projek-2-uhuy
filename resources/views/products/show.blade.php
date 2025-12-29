@@ -46,7 +46,7 @@
           <div>
             <!-- Title and Category -->
             <div class="mb-6">
-              <p class="text-slate-500 text-sm mb-2">📂 Kategori: <span class="font-semibold text-slate-900">{{ $product->category }}</span></p>
+              <p class="text-slate-500 text-sm mb-2">📂 Kategori: <span class="font-semibold text-slate-900">{{ $product->category->name ?? 'Tanpa Kategori' }}</span></p>
               <h1 class="text-4xl font-bold text-slate-900 mb-2">{{ $product->name }}</h1>
             </div>
 
@@ -93,7 +93,7 @@
                 </div>
               </div>
 
-              <!-- Buttons -->
+            <!-- Buttons -->
               <div class="flex flex-col sm:flex-row gap-4">
                 <button 
                   type="submit" 
@@ -112,6 +112,23 @@
                 >
                   👜 Lihat Keranjang
                 </a>
+                @auth
+                <button 
+                  type="button"
+                  onclick="toggleWishlist({{ $product->id }})"
+                  id="wishlistBtn"
+                  class="flex-1 px-6 py-4 border-2 rounded-lg font-bold text-lg transition {{ $inWishlist ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100' : 'border-slate-300 text-slate-600 hover:border-red-500 hover:text-red-600' }}"
+                >
+                  {{ $inWishlist ? '❤️ Hapus dari Wishlist' : '🤍 Tambah ke Wishlist' }}
+                </button>
+                @else
+                <a 
+                  href="{{ route('login') }}" 
+                  class="flex-1 px-6 py-4 border-2 border-slate-300 text-slate-600 rounded-lg font-bold text-lg hover:border-red-500 hover:text-red-600 transition text-center"
+                >
+                  🤍 Login untuk Wishlist
+                </a>
+                @endauth
               </div>
             </form>
 
@@ -136,10 +153,133 @@
 
       <!-- Related Products Section -->
       <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">⭐ Rating & Review</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <!-- Rating Summary -->
+          <div class="glass-effect rounded-2xl p-8 text-center">
+            <div class="text-5xl font-bold text-yellow-500 mb-2">
+              {{ number_format($product->averageRating(), 1) }}
+            </div>
+            <div class="text-yellow-500 mb-2">
+              @php
+                $rating = $product->averageRating();
+                $fullStars = floor($rating);
+                for ($i = 0; $i < 5; $i++) {
+                  echo $i < $fullStars ? '★' : '☆';
+                }
+              @endphp
+            </div>
+            <p class="text-slate-600">Berdasarkan {{ $product->reviewCount() }} review</p>
+          </div>
+
+          <!-- Add Review Form -->
+          <div class="lg:col-span-2">
+            @auth
+              <div class="glass-effect rounded-2xl p-8">
+                <h3 class="text-xl font-bold text-slate-900 mb-4">
+                  {{ $userReview ? 'Ubah Review Anda' : 'Berikan Review Anda' }}
+                </h3>
+
+                <form action="{{ route('review.store', $product->id) }}" method="POST">
+                  @csrf
+
+                  <div class="mb-4">
+                    <label class="block font-semibold text-slate-900 mb-2">Rating</label>
+                    <div class="flex gap-2">
+                      @for ($i = 1; $i <= 5; $i++)
+                        <button 
+                          type="button" 
+                          onclick="setRating({{ $i }})"
+                          id="star-{{ $i }}"
+                          class="text-4xl transition hover:scale-125"
+                        >
+                          ☆
+                        </button>
+                      @endfor
+                    </div>
+                    <input type="hidden" name="rating" id="rating" value="{{ $userReview->rating ?? 0 }}" required>
+                  </div>
+
+                  <div class="mb-4">
+                    <label class="block font-semibold text-slate-900 mb-2">Komentar (opsional)</label>
+                    <textarea 
+                      name="comment" 
+                      rows="4"
+                      placeholder="Bagikan pengalaman Anda dengan produk ini..."
+                      class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+                    >{{ $userReview->comment ?? '' }}</textarea>
+                  </div>
+
+                  <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                    {{ $userReview ? 'Perbarui Review' : 'Kirim Review' }}
+                  </button>
+                </form>
+              </div>
+            @else
+              <div class="glass-effect rounded-2xl p-8 text-center">
+                <p class="text-slate-600 mb-4">Silakan login untuk memberikan review</p>
+                <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-700 font-semibold">
+                  Login Sekarang
+                </a>
+              </div>
+            @endauth
+          </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="glass-effect rounded-2xl p-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-6">Review dari Pelanggan</h3>
+
+          @if($product->reviews()->count() > 0)
+            <div class="space-y-6">
+              @foreach($product->reviews()->latest()->get() as $review)
+                <div class="border-b border-slate-200 pb-6 last:border-b-0 last:pb-0">
+                  <div class="flex justify-between items-start mb-2">
+                    <div>
+                      <p class="font-semibold text-slate-900">{{ $review->user->name }}</p>
+                      <p class="text-sm text-slate-500">{{ $review->created_at->diffForHumans() }}</p>
+                    </div>
+                    <div class="text-yellow-500">
+                      @php
+                        for ($i = 0; $i < $review->rating; $i++) {
+                          echo '★';
+                        }
+                        for ($i = $review->rating; $i < 5; $i++) {
+                          echo '☆';
+                        }
+                      @endphp
+                    </div>
+                  </div>
+
+                  @if($review->comment)
+                    <p class="text-slate-700 mb-3">{{ $review->comment }}</p>
+                  @endif
+
+                  @if(auth()->check() && (auth()->user()->id === $review->user_id || auth()->user()->isAdmin()))
+                    <form action="{{ route('review.destroy', $review->id) }}" method="POST" class="inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-semibold">
+                        Hapus Review
+                      </button>
+                    </form>
+                  @endif
+                </div>
+              @endforeach
+            </div>
+          @else
+            <p class="text-center text-slate-500 py-8">Belum ada review untuk produk ini</p>
+          @endif
+        </div>
+      </div>
+
+      <!-- Related Products Section -->
+      <div class="mb-8">
         <h2 class="text-2xl font-bold text-slate-900 mb-6">🎯 Produk Terkait</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           @php
-            $relatedProducts = \App\Models\Product::where('category', $product->category)
+            $relatedProducts = \App\Models\Product::where('category_id', $product->category_id)
               ->where('id', '!=', $product->id)
               ->limit(4)
               ->get();
@@ -172,4 +312,57 @@
       </div>
     </div>
   </div>
+
+  @auth
+  <script>
+    let currentRating = {{ $userReview->rating ?? 0 }};
+
+    function setRating(rating) {
+      currentRating = rating;
+      document.getElementById('rating').value = rating;
+      
+      for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById('star-' + i);
+        if (i <= rating) {
+          star.textContent = '★';
+          star.classList.add('text-yellow-500');
+          star.classList.remove('text-slate-300');
+        } else {
+          star.textContent = '☆';
+          star.classList.add('text-slate-300');
+          star.classList.remove('text-yellow-500');
+        }
+      }
+    }
+
+    function toggleWishlist(productId) {
+      const btn = document.getElementById('wishlistBtn');
+      
+      fetch('/wishlist/toggle/' + productId, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'added') {
+          btn.textContent = '❤️ Hapus dari Wishlist';
+          btn.classList.remove('border-slate-300', 'text-slate-600', 'hover:border-red-500', 'hover:text-red-600');
+          btn.classList.add('border-red-500', 'bg-red-50', 'text-red-600', 'hover:bg-red-100');
+        } else {
+          btn.textContent = '🤍 Tambah ke Wishlist';
+          btn.classList.remove('border-red-500', 'bg-red-50', 'text-red-600', 'hover:bg-red-100');
+          btn.classList.add('border-slate-300', 'text-slate-600', 'hover:border-red-500', 'hover:text-red-600');
+        }
+      });
+    }
+
+    // Initialize rating display
+    if (currentRating > 0) {
+      setRating(currentRating);
+    }
+  </script>
+  @endauth
 </x-app-layout>

@@ -72,7 +72,7 @@ class OrderController extends Controller
             session()->forget('cart_items');
         }
 
-        // For manual WA flow, redirect to a confirmation view with order id
-        return redirect()->route('home')->with('success', 'Pesanan berhasil dibuat. ID: '.$order->id);
+        // Redirect to payment page to process payment via Midtrans
+        return redirect()->route('payment.page', $order->id);
     }
 }
