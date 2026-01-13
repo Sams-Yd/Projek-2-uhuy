@@ -118,7 +118,7 @@
               <!-- Total -->
               <div class="flex justify-between mb-6">
                 <span class="text-lg font-bold text-slate-900">Total</span>
-                <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span id="cart-total-final" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Rp{{ number_format($total, 0, ',', '.') }}
                 </span>
               </div>
@@ -141,55 +141,84 @@
       @endif
     </div>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', ()=>{
-      function updateBadge(count){
-        const b = document.querySelector('.cart-badge'); if(b) b.textContent = count;
+ <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Fungsi update badge navbar
+    function updateBadge(count) {
+      const b = document.querySelector('.cart-badge');
+      if (b) b.textContent = count;
+    }
+
+    // Fungsi utama untuk kirim data ke server
+    async function sendUpdate(form) {
+      const productId = form.dataset.productId;
+      const qty = form.querySelector('.qty-input').value;
+      const url = form.action;
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ qty: qty })
+        });
+
+        const json = await res.json();
+
+        if (json && json.success) {
+          // 1. Update angka di tampilan (antara tombol + dan -)
+          form.querySelector('.qty-display').textContent = json.qty;
+          
+          // 2. Update Subtotal barang tersebut
+          const subtotalEl = document.querySelector(`.item-subtotal[data-product-id="${productId}"]`);
+          if (subtotalEl) subtotalEl.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(json.itemSubtotal);
+          
+          // 3. Update Ringkasan Pesanan (Total Harga)
+          const totalElements = document.querySelectorAll('#cart-total, .text-2xl.font-bold.bg-gradient-to-r');
+          totalElements.forEach(el => {
+              el.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(json.total);
+          });
+
+          // 4. Update Jumlah Item
+          const countEl = document.getElementById('cart-items-count');
+          if (countEl) countEl.textContent = json.count + ' produk';
+          
+          updateBadge(json.count);
+        }
+      } catch (err) {
+        console.error('Update failed:', err);
       }
+    }
 
-      document.querySelectorAll('.qty-decrease').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const form = btn.closest('.cart-update-form');
-          const input = form.querySelector('.qty-input');
-          let v = Math.max(1, parseInt(input.value || '1') - 1);
-          input.value = v; form.dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
-        });
-      });
-      document.querySelectorAll('.qty-increase').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const form = btn.closest('.cart-update-form');
-          const input = form.querySelector('.qty-input');
-          let v = Math.max(1, parseInt(input.value || '1') + 1);
-          input.value = v; form.dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
-        });
-      });
-
-      // Intercept form submit for cart-update
-      document.querySelectorAll('.cart-update-form').forEach(form=>{
-        form.addEventListener('submit', async function(e){
-          e.preventDefault();
-          try{
-            const fd = new FormData(form);
-            const res = await fetch(form.action, { method: 'POST', body: fd, headers: { 'X-Requested-With':'XMLHttpRequest' } });
-            const json = await res.json();
-            if(json && json.success){
-              // update qty display
-              form.querySelector('.qty-display').textContent = json.qty;
-              // update item subtotal
-              const pid = form.dataset.productId;
-              const el = document.querySelector('.item-subtotal[data-product-id="'+pid+'"]');
-              if(el) el.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(json.itemSubtotal);
-              // update total
-              const totalEl = document.getElementById('cart-total');
-              if(totalEl) totalEl.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(json.total);
-              // update items count text
-              const countEl = document.getElementById('cart-items-count');
-              if(countEl) countEl.textContent = (json.count) + ' produk';
-              updateBadge(json.count);
-            }
-          }catch(err){ console.error(err); }
-        });
+    // Event Listener Tombol Kurang (-)
+    document.querySelectorAll('.qty-decrease').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const form = btn.closest('.cart-update-form');
+        const input = form.querySelector('.qty-input');
+        let v = parseInt(input.value || '1');
+        if (v > 1) {
+          input.value = v - 1;
+          sendUpdate(form);
+        }
       });
     });
-  </script>
+
+    // Event Listener Tombol Tambah (+)
+    document.querySelectorAll('.qty-increase').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const form = btn.closest('.cart-update-form');
+        const input = form.querySelector('.qty-input');
+        let v = parseInt(input.value || '1');
+        input.value = v + 1;
+        sendUpdate(form);
+      });
+    });
+  });
+</script>
 </x-app-layout>

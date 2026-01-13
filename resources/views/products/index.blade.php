@@ -187,8 +187,7 @@
                     <form action="{{ route('cart.add', $product->id) }}" method="post">
                       @csrf
                       <input type="hidden" name="qty" value="1">
-                      <button 
-                        type="submit" 
+                      <button type="submit" onclick="this.disabled=true;this.form.submit();"
                         class="w-full px-4 py-2 rounded-lg shadow font-bold text-white transition disabled:opacity-50 disabled:cursor-not-allowed
                           @if($product->stock <= 0)
                             bg-gray-400 hover:bg-gray-400

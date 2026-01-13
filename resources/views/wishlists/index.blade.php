@@ -11,12 +11,14 @@
                                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition">
                                     <div class="aspect-square bg-gray-100 overflow-hidden">
                                         @if($wishlist->product->image)
-                                            <img src="{{ asset('storage/' . $wishlist->product->image) }}" 
+                                            {{-- Penyesuaian path gambar ke assets/img --}}
+                                            <img src="{{ asset('assets/img/' . basename($wishlist->product->image)) }}" 
                                                  alt="{{ $wishlist->product->name }}"
-                                                 class="w-full h-full object-cover">
+                                                    class="w-full h-full object-cover"
+                                                    onerror="this.src='{{ asset('assets/img/default-product.png') }}'">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center bg-gray-200">
-                                                <span class="text-gray-400">Tidak ada gambar</span>
+                                                 <span class="text-gray-400">Tidak ada gambar</span>
                                             </div>
                                         @endif
                                     </div>

@@ -1,30 +1,42 @@
-// cart.js - update subtotal dan total otomatis saat qty berubah di keranjang
-
 document.addEventListener('DOMContentLoaded', function() {
-  const qtyInputs = document.querySelectorAll('input[type="number"][name^="qty["]');
-  if (!qtyInputs.length) return;
+    const qtyInputs = document.querySelectorAll('.qty-input');
 
-  function updateCartTotals() {
-    let total = 0;
     qtyInputs.forEach(function(input) {
-      const tr = input.closest('tr');
-      const priceCell = tr.querySelector('td:nth-child(3)');
-      const subtotalCell = tr.querySelector('td:nth-child(5)');
-      if (!priceCell || !subtotalCell) return;
-      const price = parseInt(priceCell.textContent.replace(/[^\d]/g, ''));
-      const qty = parseInt(input.value);
-      const subtotal = price * qty;
-      subtotalCell.textContent = 'Rp' + subtotal.toLocaleString('id-ID');
-      total += subtotal;
-    });
-    // Update total di tfoot
-    const totalCell = document.querySelector('tfoot td.text-primary');
-    if (totalCell) {
-      totalCell.textContent = 'Rp' + total.toLocaleString('id-ID');
-    }
-  }
+        input.addEventListener('change', function() {
+            const productId = this.dataset.id;
+            const newQty = parseInt(this.value);
+            const tr = this.closest('tr');
 
-  qtyInputs.forEach(function(input) {
-    input.addEventListener('input', updateCartTotals);
-  });
+            if (newQty < 1) {
+                this.value = 1;
+                return;
+            }
+
+            // Kirim update ke Laravel (Controller)
+            fetch(`/cart/update/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ qty: newQty })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update Subtotal baris ini
+                    const subtotalCell = tr.querySelector('.subtotal-cell');
+                    subtotalCell.textContent = 'Rp' + data.itemSubtotal.toLocaleString('id-ID');
+
+                    // Update Grand Total di bawah
+                    const totalCell = document.querySelector('.cart-total-price');
+                    if (totalCell) {
+                        totalCell.textContent = 'Rp' + data.total.toLocaleString('id-ID');
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
 });

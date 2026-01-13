@@ -190,7 +190,7 @@ Let’s make work & study more productive</p>
         <footer class="py-10 bg-transparent mt-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-600">
                 <div class="mb-4">© {{ date('Y') }} Mitus Stationery — Semua hak dilindungi.</div>
-                <div class="text-sm">Designed by zou and team</div>
+                <div class="text-sm">Designed by zou and</div>
             </div>
         </footer>
 

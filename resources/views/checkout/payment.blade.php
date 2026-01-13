@@ -20,7 +20,7 @@
       snap.pay(token, {
         onSuccess: function(result){
           console.log('success', result);
-          window.location.href = "{{ route('home') }}";
+          window.location.href = "{{ route('dashboard') }}";
         },
         onPending: function(result){
           console.log('pending', result);

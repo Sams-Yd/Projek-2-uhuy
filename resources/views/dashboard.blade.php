@@ -149,11 +149,19 @@
                             <div class="glass-effect product-card overflow-hidden flex flex-col">
                                 <!-- Product Image -->
                                 <div class="relative bg-gradient-to-br from-slate-100 to-slate-200 h-48 flex items-center justify-center overflow-hidden">
-                                    @if($product->image)
-                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
-                                    @else
-                                        <div class="text-5xl">📦</div>
-                                    @endif
+                                   @if($product->image)
+                                         @php 
+                                             // Mengambil hanya nama file (misal: buku.png) 
+                                            // jika data di database berupa path lengkap
+                                            $imgName = basename($product->image); 
+                                         @endphp
+                                         <img src="{{ asset('assets/img/' . $imgName) }}" 
+                                            alt="{{ $product->name }}" 
+                                             class="product-image"
+                                                 onerror="this.src='{{ asset('assets/img/default-product.png') }}'">
+                                            @else
+                                                <div class="text-5xl">📦</div>
+                                            @endif
                                     <div class="absolute top-2 right-2">
                                         <span class="inline-block px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full">
                                             Stok: {{ $product->stock }}
