@@ -112,6 +112,7 @@
             <a href="{{ route('admin.orders') }}" class="flex items-center gap-3 p-3 rounded-lg bg-white/50 hover:bg-white/60 transition"><span>📦</span><span class="font-medium">Kelola Pesanan</span></a>
             <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 p-3 rounded-lg bg-white/50 hover:bg-white/60 transition"><span>👥</span><span class="font-medium">Kelola User</span></a>
             <a href="{{ route('admin.products') }}" class="flex items-center gap-3 p-3 rounded-lg bg-white/50 hover:bg-white/60 transition"><span>📚</span><span class="font-medium">Kelola Produk</span></a>
+            <a href="{{ route('categories.index') }}" class="flex items-center gap-3 p-3 rounded-lg bg-white/50 hover:bg-white/60 transition"><span>📁</span><span class="font-medium">Kelola Kategori</span></a>
             <a href="{{ route('home') }}" class="flex items-center gap-3 p-3 rounded-lg bg-white/50 hover:bg-white/60 transition"><span>🏪</span><span class="font-medium">Lihat Toko</span></a>
           </div>
 

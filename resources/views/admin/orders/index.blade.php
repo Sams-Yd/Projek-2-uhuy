@@ -10,9 +10,15 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold text-white">📦 Daftar Pesanan</h1>
-                <p class="text-slate-400 mt-2">Kelola dan pantau semua pesanan dari pelanggan</p>
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold text-white">📦 Daftar Pesanan</h1>
+                    <p class="text-slate-400 mt-2">Kelola dan pantau semua pesanan dari pelanggan</p>
+                </div>
+                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Kembali ke Dashboard
+                </a>
             </div>
 
             <!-- Filter Section -->
